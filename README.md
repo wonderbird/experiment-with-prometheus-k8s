@@ -8,14 +8,49 @@ The software in this project is highly experimental. Its only purpose is for me 
 
 ## Usage
 
-Create the base infrastructure as described in section "... With Azure CLI Support" of [boos/terraform](https://hub.docker.com/repository/docker/boos/terraform)
+1. Create the base infrastructure as described in section "... With Azure CLI Support" of [boos/terraform](https://hub.docker.com/repository/docker/boos/terraform)
 
 ```sh
 # To apply a modified configuration of the infrastructure quickly, execute
 # the following commands in the boos/terraform docker container
 cd /root/work/infrastructure
 
+# If this is the first time you run terraform in this directory
+# then initialize the terraform state
+terraform init
+
+# Create or update the k8s infrastructure in azure
 terraform apply -auto-approve -var client_id="$ARM_CLIENT_ID" -var client_secret="$ARM_CLIENT_SECRET"
+```
+
+2. Export the infrastructure configuration from the terraform state into environment variables of the docker container
+
+```sh
+export TF_VAR_k8s_host=$(terraform output host) \
+  && export TF_VAR_k8s_username=$(terraform output username) \
+  && export TF_VAR_k8s_password=$(terraform output password) \
+  && export TF_VAR_k8s_client_certificate=$(terraform output client_certificate) \
+  && export TF_VAR_k8s_client_key=$(terraform output client_key) \
+  && export TF_VAR_k8s_cluster_ca_certificate=$(terraform output cluster_ca_certificate) \
+  && echo "                  Host = ${TF_VAR_k8s_host}" \
+  && echo "              Username = ${TF_VAR_k8s_username}" \
+  && echo "              Password = <won't be printed here>" \
+  && echo "    Client certificate = <won't be printed here>" \
+  && echo "            Client key = <won't be printed here>" \
+  && echo "Cluster CA certificate = <won't be printed here>"
+```
+
+3. Create the services hosted on k8s one after another. That meas, for each `directory` in `prometheus`, do
+
+```sh
+cd /root/work/<directory>
+
+# If this is the first time you run terraform in this directory
+# then initialize the terraform state
+terraform init
+
+# Create or update the service in kubernetes
+terraform apply -auto-approve
 ```
 
 ## Inspect the Infrastructure
@@ -33,6 +68,26 @@ az aks install-cli
 # http://localhost:8001
 az aks get-credentials --resource-group k8srg --name k8s_prod
 az aks browse --resource-group k8srg --name k8s_prod
+```
+
+## Cleanup and Destroy the Infrastructure
+
+To remove the entire kubernetes cluster
+
+1. Destroy all deployments in k8s: For each directory except infrastructure, do
+
+```sh
+cd /root/work/<directory>
+
+terraform destroy
+```
+
+2. Destroy the kubernetes cluster itself
+
+```sh
+cd /root/work/infrastructure
+
+terraform destroy
 ```
 
 ## Outlook
