@@ -10,6 +10,19 @@ The software in this project is highly experimental. Its only purpose is for me 
 
 Create the base infrastructure as described in section "... With Azure CLI Support" of [boos/terraform](https://hub.docker.com/repository/docker/boos/terraform)
 
+## Inspect the Infrastructure
+
+There are two options for inspecting the kubernetes configuration:
+
+1. Follow the instructions on [Azure Portal](https://portal.azure.com) &rarr; Resource groups &rarr; k8srg &rarr; k8s_prod &rarr; View kubernetes dashboard
+
+```sh
+# On your local machine - outside the boos/terraform docker container
+az aks install-cli
+az aks get-credentials --resource-group k8srg --name k8s_prod
+az aks browse --resource-group k8srg --name k8s_prod
+```
+
 ## Outlook
 
 (This repo is not there yet. Next step: Find out how to separate the persistent infrastructure from team owned k8s deployments - inspiration: https://www.terraform.io/docs/state/workspaces.html)
@@ -31,6 +44,8 @@ Once the system is running you can...
 * HashiCorp: [Azure Provider: Authenticating using a Service Principal with a Client Secret](https://www.terraform.io/docs/providers/azurerm/guides/service_principal_client_secret.html), last visited on Jan. 21, 2020.
 * Microsoft: [Create your Azure free account today](https://azure.microsoft.com/en-us/free/), last visited on Jan. 21, 2020
 * Microsoft: [Tutorial: Create a Kubernetes cluster with Azure Kubernetes Service using Terraform](https://docs.microsoft.com/de-de/azure/terraform/terraform-create-k8s-cluster-with-tf-and-aks), last visited on Jan. 21, 2020
+* HashiCorp: [Creating a Kubernetes Cluster with AKS and Terraform](https://www.hashicorp.com/blog/kubernetes-cluster-with-aks-and-terraform/), last visited on Jan. 21, 2020
+* HashiCorp: [Getting Started with Kubernetes provider](https://www.terraform.io/docs/providers/kubernetes/guides/getting-started.html), last visited on Jan. 21, 2020.
 * Prometheus Authors: [Prometheus - Monitoring system & time series database](https://prometheus.io), last visited on Jan. 21, 2020
 * Prometheus Authors: [prometheus/blackbox_exporter](https://github.com/prometheus/blackbox_exporter), last visited on Jan. 21, 2020
 * Grafana Labs: [Grafana: The open observability platform](https://grafana.com), last visited on Jan. 21, 2020
