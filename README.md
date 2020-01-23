@@ -32,6 +32,7 @@ export TF_VAR_k8s_host=$(terraform output host) \
   && export TF_VAR_k8s_client_certificate=$(terraform output client_certificate) \
   && export TF_VAR_k8s_client_key=$(terraform output client_key) \
   && export TF_VAR_k8s_cluster_ca_certificate=$(terraform output cluster_ca_certificate) \
+  & echo \
   && echo "                  Host = ${TF_VAR_k8s_host}" \
   && echo "              Username = ${TF_VAR_k8s_username}" \
   && echo "              Password = <won't be printed here>" \
@@ -40,7 +41,7 @@ export TF_VAR_k8s_host=$(terraform output host) \
   && echo "Cluster CA certificate = <won't be printed here>"
 ```
 
-3. Create the services hosted on k8s one after another. That meas, for each `directory` in `prometheus`, do
+3. Create the services hosted on k8s one after another. That meas, for each `directory` except `infrastructure`, do
 
 ```sh
 cd /root/work/<directory>
@@ -74,7 +75,7 @@ az aks browse --resource-group k8srg --name k8s_prod
 
 To remove the entire kubernetes cluster
 
-1. Destroy all deployments in k8s: For each directory except infrastructure, do
+1. Destroy all deployments in k8s: For each `directory` except `infrastructure`, do
 
 ```sh
 cd /root/work/<directory>
@@ -89,6 +90,16 @@ cd /root/work/infrastructure
 
 terraform destroy
 ```
+
+## Next Steps
+
+### Create Prometheus Deployment
+
+* To monitor the kubernetes infrastructure, follow the guide from Hasham Haider: [Kubernetes in Production: The Ultimate Guide to Monitoring Resource Metrics with Prometheus](https://www.replex.io/blog/kubernetes-in-production-the-ultimate-guide-to-monitoring-resource-metrics).
+
+### Resolve Code Smells
+
+* Set resource constraints in the kubernetes pod configurations (min/max values, pod restart rules)
 
 ## Outlook
 
@@ -114,8 +125,11 @@ Once the system is running you can...
 * HashiCorp: [Creating a Kubernetes Cluster with AKS and Terraform](https://www.hashicorp.com/blog/kubernetes-cluster-with-aks-and-terraform/), last visited on Jan. 21, 2020
 * HashiCorp: [Getting Started with Kubernetes provider](https://www.terraform.io/docs/providers/kubernetes/guides/getting-started.html), last visited on Jan. 21, 2020
 * HashiCorp: [Terraform Recommended Practices - Part 1: An Overview of Our Recommended Workflow](https://www.terraform.io/docs/cloud/guides/recommended-practices/part1.html), last visited on Jan. 22, 2020
-* Prometheus Authors: [Prometheus - Monitoring system & time series database](https://prometheus.io), last visited on Jan. 21, 2020
-* Prometheus Authors: [prometheus/blackbox_exporter](https://github.com/prometheus/blackbox_exporter), last visited on Jan. 21, 2020
+* Hasham Haider: [Kubernetes in Production: The Ultimate Guide to Monitoring Resource Metrics with Prometheus](https://www.replex.io/blog/kubernetes-in-production-the-ultimate-guide-to-monitoring-resource-metrics), last visited on Jan. 23, 2020
+* Microsoft: [Tutorial: Scale applications in Azure Kubernetes Service (AKS)](https://docs.microsoft.com/de-de/azure/aks/tutorial-kubernetes-scale), last visited on Jan. 23, 2020
+* The Kubernetes Authors: [Resource metrics pipeline - Kubernetes](https://kubernetes.io/docs/tasks/debug-application-cluster/resource-metrics-pipeline/), last visited on Jan. 23, 2020
+* The Prometheus Authors: [Prometheus - Monitoring system & time series database](https://prometheus.io), last visited on Jan. 21, 2020
+* The Prometheus Authors: [prometheus/blackbox_exporter](https://github.com/prometheus/blackbox_exporter), last visited on Jan. 21, 2020
 * Grafana Labs: [Grafana: The open observability platform](https://grafana.com), last visited on Jan. 21, 2020
 * Joshua Barrat: [jbarratt/prometheus_sitemon](https://github.com/jbarratt/prometheus_sitemon), last visited on Jan. 21, 2020
 * Stefan Boos: [boos/terraform](https://hub.docker.com/repository/docker/boos/terraform), last visited on Jan. 21, 2020
