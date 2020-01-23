@@ -25,10 +25,23 @@ resource "azurerm_kubernetes_cluster" "k8s_prod" {
 # The kubernetes configuration is required so that we are able to setup,
 # modify or delete core infrastructure
 provider "kubernetes" {
-  host                   = "${azurerm_kubernetes_cluster.k8s_prod.kube_config.0.host}"
-  username               = "${azurerm_kubernetes_cluster.k8s_prod.kube_config.0.username}"
-  password               = "${azurerm_kubernetes_cluster.k8s_prod.kube_config.0.password}"
-  client_certificate     = "${base64decode(azurerm_kubernetes_cluster.k8s_prod.kube_config.0.client_certificate)}"
-  client_key             = "${base64decode(azurerm_kubernetes_cluster.k8s_prod.kube_config.0.client_key)}"
-  cluster_ca_certificate = "${base64decode(azurerm_kubernetes_cluster.k8s_prod.kube_config.0.cluster_ca_certificate)}"
+  host                   = azurerm_kubernetes_cluster.k8s_prod.kube_config.0.host
+  username               = azurerm_kubernetes_cluster.k8s_prod.kube_config.0.username
+  password               = azurerm_kubernetes_cluster.k8s_prod.kube_config.0.password
+  client_certificate     = base64decode(azurerm_kubernetes_cluster.k8s_prod.kube_config.0.client_certificate)
+  client_key             = base64decode(azurerm_kubernetes_cluster.k8s_prod.kube_config.0.client_key)
+  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.k8s_prod.kube_config.0.cluster_ca_certificate)
+}
+
+provider "helm" {
+  install_tiller = true
+  
+  kubernetes {
+    host                   = var.k8s_host
+    username               = var.k8s_username
+    password               = var.k8s_password
+    client_certificate     = base64decode(var.k8s_client_certificate)
+    client_key             = base64decode(var.k8s_client_key)
+    cluster_ca_certificate = base64decode(var.k8s_cluster_ca_certificate)
+  }
 }
