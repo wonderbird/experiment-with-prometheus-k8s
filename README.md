@@ -31,14 +31,30 @@ export TF_VAR_k8s_host=$(terraform output host) \
   && export TF_VAR_k8s_password=$(terraform output password) \
   && export TF_VAR_k8s_client_certificate=$(terraform output client_certificate) \
   && export TF_VAR_k8s_client_key=$(terraform output client_key) \
-  && export TF_VAR_k8s_cluster_ca_certificate=$(terraform output cluster_ca_certificate) \
-  & echo \
-  && echo "                  Host = ${TF_VAR_k8s_host}" \
-  && echo "              Username = ${TF_VAR_k8s_username}" \
-  && echo "              Password = <won't be printed here>" \
-  && echo "    Client certificate = <won't be printed here>" \
-  && echo "            Client key = <won't be printed here>" \
-  && echo "Cluster CA certificate = <won't be printed here>"
+  && export TF_VAR_k8s_cluster_ca_certificate=$(terraform output cluster_ca_certificate); \
+  echo; \
+  echo "                  Host = ${TF_VAR_k8s_host}"; \
+  echo "              Username = ${TF_VAR_k8s_username}" ; \
+  if [ -z "$TF_VAR_k8s_password" ]; then \
+    echo "              Password is empty"; \
+  else \
+    echo "              Password won't be printed here"; \
+  fi; \
+  if [ -z "$TF_VAR_k8s_client_certificate" ]; then \
+    echo "    Client certificate is empty"; \
+  else \
+    echo "    Client certificate won't be printed here"; \
+  fi; \
+  if [ -z "$TF_VAR_k8s_client_key" ]; then \
+    echo "            Client key is empty"; \
+  else \
+    echo "            Client key won't be printed here"; \
+  fi; \
+  if [ -z "$TF_VAR_k8s_cluster_ca_certificate" ]; then \
+    echo "Cluster CA certificate is empty"; \
+  else \
+    echo "Cluster CA certificate won't be printed here"; \
+  fi
 ```
 
 3. Create the services hosted on k8s one after another. That meas, for each `directory` except `infrastructure`, do
