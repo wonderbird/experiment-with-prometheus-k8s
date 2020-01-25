@@ -114,6 +114,10 @@ terraform destroy
 * To monitor the kubernetes infrastructure, follow the guide from Hasham Haider: [Kubernetes in Production: The Ultimate Guide to Monitoring Resource Metrics with Prometheus](https://www.replex.io/blog/kubernetes-in-production-the-ultimate-guide-to-monitoring-resource-metrics).
   * Configure Helm in the kubernetes cluster
 
+### Establish Security
+
+* [Securing your Helm Installation](https://v2.helm.sh/docs/using_helm/#securing-your-helm-installation)
+
 ### Resolve Code Smells
 
 * Set resource constraints in the kubernetes pod configurations (min/max values, pod restart rules)

@@ -8,6 +8,8 @@ provider "kubernetes" {
 }
 
 provider "helm" {
+  install_tiller = true
+  
   kubernetes {
     host                   = var.k8s_host
     username               = var.k8s_username
