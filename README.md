@@ -4,7 +4,11 @@ Experimenting with prometheus and its ecosystem hosted on azure kubernetes servi
 
 This project shows how to run a prometheus server, connect it to grafana and add some services for scraping metrics.
 
-The software in this project is highly experimental. Its only purpose is for me to learn about prometheus and grafana features and integrating them into a docker-compose / kubernetes environment which is hosted on azure.
+The software in this project is highly experimental. Its only purpose is for me to learn about
+* prometheus and grafana features,
+* integrating them into a kubernetes environment
+* which is hosted on azure
+* and deployed using terraform.
 
 ## Usage
 
@@ -57,10 +61,10 @@ export TF_VAR_k8s_host=$(terraform output host) \
   fi
 ```
 
-3. Create the services hosted on k8s one after another. That meas, for each `directory` except `infrastructure`, do
+3. Create the services hosted on k8s:
 
 ```sh
-cd /root/work/<directory>
+cd /root/work/monitoring
 
 # If this is the first time you run terraform in this directory
 # then initialize the terraform state
@@ -91,19 +95,19 @@ az aks browse --resource-group k8srg --name k8s_prod
 
 Once the system is running you can...
 
-* To view prometheus on http://localhost:9090/ forward its port by `kubectl port-forward -n monitoring  prometheus-prometheus-operator-prometheus-0 9090:9090`
-* To view grafana on http://localhost:3000/ forward its port by `kubectl port-forward -n monitoring prometheus-operator-grafana-5656685f99-wzrtc 3000:3000`. You can find out the pod name, the user name and the password in the kubernetes dashboard.
+* To view Prometheus on http://localhost:9090/ forward its port by `kubectl port-forward -n monitoring  prometheus-prometheus-operator-prometheus-0 9090:9090`
+* To view Grafana on http://localhost:3000/ forward its port by `kubectl port-forward -n monitoring prometheus-operator-grafana-5656685f99-wzrtc 3000:3000`. You can find out the pod name, the user name and the password in the kubernetes dashboard.
 
 ## Cleanup and Destroy the Infrastructure
 
 To remove the entire kubernetes cluster
 
-1. Destroy all deployments in k8s: For each `directory` except `infrastructure`, do
+1. Destroy the deployment inside k8s
 
 ```sh
-cd /root/work/<directory>
+cd /root/work/monitoring
 
-terraform destroy
+terraform destroy -auto-approve
 ```
 
 2. Destroy the kubernetes cluster itself
@@ -111,14 +115,10 @@ terraform destroy
 ```sh
 cd /root/work/infrastructure
 
-terraform destroy
+terraform destroy -auto-approve
 ```
 
 ## Next Steps
-
-### Create Prometheus Deployment
-
-* To monitor the kubernetes infrastructure, follow the guide from Hasham Haider: [Kubernetes in Production: The Ultimate Guide to Monitoring Resource Metrics with Prometheus](https://www.replex.io/blog/kubernetes-in-production-the-ultimate-guide-to-monitoring-resource-metrics).
 
 ### Establish Security
 
