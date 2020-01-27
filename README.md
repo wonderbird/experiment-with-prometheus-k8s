@@ -15,6 +15,40 @@ The software in this project is highly experimental. Its only purpose is for me 
 1. Create the base infrastructure as described in section "... With Azure CLI Support" of [boos/terraform](https://hub.docker.com/repository/docker/boos/terraform)
 
 ```sh
+# Pass your Login Credentials to the Azure CLI and to Terraform
+echo -n "Azure client id: " && read -s ARM_CLIENT_ID && echo
+echo -n "Azure client secret: " && read -s ARM_CLIENT_SECRET && echo
+echo -n "Azure subscription id: " && read -s ARM_SUBSCRIPTION_ID && echo
+echo -n "Azure tenant id: " && read -s ARM_TENANT_ID && echo
+
+export ARM_CLIENT_ID
+export ARM_CLIENT_SECRET
+export ARM_SUBSCRIPTION_ID
+export ARM_TENANT_ID
+export TF_VAR_client_id=$ARM_CLIENT_ID
+export TF_VAR_client_secret=$ARM_CLIENT_SECRET
+
+echo
+echo "      ARM_CLIENT_ID = $ARM_CLIENT_ID"
+if [ -z "$ARM_CLIENT_SECRET" ]; then
+    echo "  ARM_CLIENT_SECRET is empty"
+else
+    echo "  ARM_CLIENT_SECRET = <not printed here>"
+fi
+echo "ARM_SUBSCRIPTION_ID = $ARM_SUBSCRIPTION_ID"
+echo "      ARM_TENANT_ID = $ARM_TENANT_ID"
+
+# Launch the Terraform docker container
+docker run -it --rm --name terra \
+           -e "ARM_CLIENT_ID=$ARM_CLIENT_ID" \
+           -e "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID" \
+           -e "ARM_TENANT_ID=$ARM_TENANT_ID" \
+           -e "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET" \
+           -e "TF_VAR_client_id=$TF_VAR_client_id" \
+           -e "TF_VAR_client_secret=$TF_VAR_client_secret" \
+           -v /Users/stefan/src/experiment-with-prometheus-k8s:/root/work \
+           boos/terraform
+
 # To apply a modified configuration of the infrastructure quickly, execute
 # the following commands in the boos/terraform docker container
 cd /root/work/infrastructure
@@ -24,7 +58,7 @@ cd /root/work/infrastructure
 terraform init
 
 # Create or update the k8s infrastructure in azure
-terraform apply -auto-approve -var client_id="$ARM_CLIENT_ID" -var client_secret="$ARM_CLIENT_SECRET"
+terraform apply -auto-approve
 ```
 
 2. Export the infrastructure configuration from the terraform state into environment variables of the docker container
