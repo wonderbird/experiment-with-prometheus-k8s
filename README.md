@@ -154,6 +154,10 @@ terraform destroy -auto-approve
 
 ## Next Steps
 
+### Running in the Docker Desktop Kubernetes Cluster
+
+* Describe how to use a local kubernetes cluster instead of the azure cluster
+
 ### Establish Security
 
 * [Securing your Helm Installation](https://v2.helm.sh/docs/using_helm/#securing-your-helm-installation)
