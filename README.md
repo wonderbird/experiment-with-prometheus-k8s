@@ -12,6 +12,8 @@ The software in this project is highly experimental. Its only purpose is for me 
 
 ## Usage
 
+### Create a Kubernetes Cluster in Azure
+
 1. Create the base infrastructure as described in section "... With Azure CLI Support" of [boos/terraform](https://hub.docker.com/repository/docker/boos/terraform)
 
 ```sh
@@ -95,10 +97,25 @@ export TF_VAR_k8s_host=$(terraform output host) \
   fi
 ```
 
-3. Create the services hosted on k8s:
+### Alternative to Azure: Get Kubernetes Credentials for Docker Desktop Kubernetes
+
+```sh
+docker run -it --rm --name terra \
+           -v /Users/stefan/.kube:/root/.kube \
+           -v /Users/stefan/src/experiment-with-prometheus-k8s:/root/work \
+           boos/terraform
+```
+
+### Create the Services Hosted on Kubernetes
 
 ```sh
 cd /root/work/monitoring
+
+# If running a Kubernetes Cluster on Docker Desktop locally
+cp k8s-and-helm-docker-desktop k8s-and-helm.tf
+
+# If running a Kubernetes Cluster on Azure
+cp k8s-and-helm-azure k8s-and-helm.tf
 
 # If this is the first time you run terraform in this directory
 # then initialize the terraform state
@@ -152,11 +169,54 @@ cd /root/work/infrastructure
 terraform destroy -auto-approve
 ```
 
+## Miscellaneous
+
+### Running Kubernetes Dashboard on Your Local Docker-Desktop Kubernetes Cluster
+
+Setting up the Kubernetes Dashboard is described in [5 Minutes to Kubernetes Dashboard running on Docker Desktop for Windows 2.0.0.3](http://collabnix.com/kubernetes-dashboard-on-docker-desktop-for-windows-2-0-0-3-in-2-minutes/). The procedure also works on macOS Catalina.
+
+In short:
+
+```sh
+# Install the dashboard according to https://github.com/kubernetes/dashboard
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc2/aio/deploy/recommended.yaml
+
+# Forward the dashboard to localhost
+kubectl proxy
+```
+
+&rarr; Open the dashboard: http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+
+![Kubernetes Dashboard Login](docs/k8s-dashboard-login.png)
+
+Next, set the credentials for the docker-[for-]desktop user
+
+**On Windows**
+
+```powershell
+$TOKEN=((kubectl -n kube-system describe secret default | Select-String "token:") -split " +")[1]
+kubectl config set-credentials docker-for-desktop --token="${TOKEN}"
+```
+
+**On macOS / Linux**
+
+```sh
+TOKEN=$(kubectl -n kube-system describe secret default | grep '^token' | sed 's/token\:\ *//')
+kubectl config set-credentials docker-desktop --token="$TOKEN"
+```
+
+Finally, select `Kubeconfig` in the login screen, click `Choose kubeconfig file` and select the file `.kube/config` in your home directory. On macOS you may need to press `Cmd+Shift+.` in order to show hidden directories in the open file dialog.
+
+![Kubernetes Dashboard](docs/k8s-dashboard.png)
 ## Next Steps
 
 ### Running in the Docker Desktop Kubernetes Cluster
 
 * Describe how to use a local kubernetes cluster instead of the azure cluster
+  * Install the kubernetes dashboard on your docker desktop kubernetes cluster
+    * Read on at [Access Control](https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/README.md)
+    * http://collabnix.com/kubernetes-dashboard-on-docker-desktop-for-windows-2-0-0-3-in-2-minutes/
+    * https://github.com/kubernetes/dashboard
 
 ### Establish Security
 
@@ -195,5 +255,7 @@ terraform destroy -auto-approve
 
 ### Other Stuff
 
+* Ajeet Singh Raina: [5 Minutes to Kubernetes Dashboard running on Docker Desktop for Windows 2.0.0.3](http://collabnix.com/kubernetes-dashboard-on-docker-desktop-for-windows-2-0-0-3-in-2-minutes/), last visited on Jan. 30, 2020
+* The Kubernetes Dashboard Authors: [kubernetes/dashboard: General-purpose web UI for Kubernetes clusters](https://github.com/kubernetes/dashboard), last visited on Jan. 30, 2020
 * The Kubernetes Authors: [Resource metrics pipeline - Kubernetes](https://kubernetes.io/docs/tasks/debug-application-cluster/resource-metrics-pipeline/), last visited on Jan. 23, 2020
 * Stefan Boos: [boos/terraform](https://hub.docker.com/repository/docker/boos/terraform), last visited on Jan. 21, 2020

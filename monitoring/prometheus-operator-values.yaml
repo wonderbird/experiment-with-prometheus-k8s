@@ -1,0 +1,24 @@
+additionalScrapeConfigs:
+  - job_name: 'blackbox'
+  # Probe my outbound internet connection by monitoring the connection to Google
+  # See https://github.com/jbarratt/prometheus_sitemon/blob/master/docker-compose.yml
+  # and https://github.com/prometheus/blackbox_exporter
+  metrics_path: /probe
+  params:
+    module: [http_2xx]
+  static_configs:
+    - targets:
+      # CAUTION: Emacs inserts <tab> characters in the following lines - replace them by spaces!
+      - https://www.heise.de
+      - https://www.rtl.de
+      - https://www.prosieben.de
+      - https://www.google.de
+      - https://www.prometheus.io
+  relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - source_labels: []
+      target_label: __address__
+      replacement: blackbox-exporter:9115
