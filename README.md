@@ -97,7 +97,7 @@ export TF_VAR_k8s_host=$(terraform output host) \
   fi
 ```
 
-### Alternative to Azure: Get Kubernetes Credentials for Docker Desktop Kubernetes
+### Alternative to Azure: Use Docker Desktop Kubernetes
 
 ```sh
 docker run -it --rm --name terra \
@@ -106,7 +106,7 @@ docker run -it --rm --name terra \
            boos/terraform
 ```
 
-### Create the Services Hosted on Kubernetes
+### Create Services on Kubernetes
 
 ```sh
 cd /root/work/monitoring
@@ -127,6 +127,8 @@ terraform apply -auto-approve
 
 ## Inspect the Infrastructure
 
+### Azure: Access the Kubernetes Dashboard
+
 Follow the instructions on [Azure Portal](https://portal.azure.com) &rarr; Resource groups &rarr; k8srg &rarr; k8s_prod &rarr; View kubernetes dashboard:
 
 ```sh
@@ -142,36 +144,7 @@ az aks get-credentials --resource-group k8srg --name k8s_prod
 az aks browse --resource-group k8srg --name k8s_prod
 ```
 
-## Access Prometheus and Grafana
-
-Once the system is running you can...
-
-* To view Prometheus on http://localhost:9090/ forward its port by `kubectl port-forward -n monitoring  prometheus-prometheus-operator-prometheus-0 9090:9090`
-* To view Grafana on http://localhost:3000/ forward its port by `kubectl port-forward -n monitoring prometheus-operator-grafana-5656685f99-wzrtc 3000:3000`. You can find out the pod name, the user name and the password in the kubernetes dashboard.
-
-## Cleanup and Destroy the Infrastructure
-
-To remove the entire kubernetes cluster
-
-1. Destroy the deployment inside k8s
-
-```sh
-cd /root/work/monitoring
-
-terraform destroy -auto-approve
-```
-
-2. Destroy the kubernetes cluster itself
-
-```sh
-cd /root/work/infrastructure
-
-terraform destroy -auto-approve
-```
-
-## Miscellaneous
-
-### Running Kubernetes Dashboard on Your Local Docker-Desktop Kubernetes Cluster
+### Docker Desktop Kubernetes: Install Kubernetes Dashboard
 
 Setting up the Kubernetes Dashboard is described in [5 Minutes to Kubernetes Dashboard running on Docker Desktop for Windows 2.0.0.3](http://collabnix.com/kubernetes-dashboard-on-docker-desktop-for-windows-2-0-0-3-in-2-minutes/). The procedure also works on macOS Catalina.
 
@@ -194,6 +167,7 @@ Next, set the credentials for the docker-[for-]desktop user
 **On Windows**
 
 ```powershell
+# Execute the following steps in PowerShell
 $TOKEN=((kubectl -n kube-system describe secret default | Select-String "token:") -split " +")[1]
 kubectl config set-credentials docker-for-desktop --token="${TOKEN}"
 ```
@@ -208,15 +182,35 @@ kubectl config set-credentials docker-desktop --token="$TOKEN"
 Finally, select `Kubeconfig` in the login screen, click `Choose kubeconfig file` and select the file `.kube/config` in your home directory. On macOS you may need to press `Cmd+Shift+.` in order to show hidden directories in the open file dialog.
 
 ![Kubernetes Dashboard](docs/k8s-dashboard.png)
+
+## Access Prometheus and Grafana
+
+Once the system is running you can...
+
+* To view Prometheus on http://localhost:9090/ forward its port by `kubectl port-forward -n monitoring  prometheus-prometheus-operator-prometheus-0 9090:9090`
+* To view Grafana on http://localhost:3000/ forward its port by `kubectl port-forward -n monitoring prometheus-operator-grafana-5656685f99-wzrtc 3000:3000`. You can find out the pod name, the user name and the password in the kubernetes dashboard.
+
+## Cleanup and Destroy the Infrastructure
+
+### Destroy the Deployment Inside Kubernetes
+
+```sh
+cd /root/work/monitoring
+
+terraform destroy -auto-approve
+```
+
+### Azure: Destroy the Kubernetes Cluster Itself
+
+```sh
+cd /root/work/infrastructure
+
+terraform destroy -auto-approve
+```
+
 ## Next Steps
 
-### Running in the Docker Desktop Kubernetes Cluster
-
-* Describe how to use a local kubernetes cluster instead of the azure cluster
-  * Install the kubernetes dashboard on your docker desktop kubernetes cluster
-    * Read on at [Access Control](https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/README.md)
-    * http://collabnix.com/kubernetes-dashboard-on-docker-desktop-for-windows-2-0-0-3-in-2-minutes/
-    * https://github.com/kubernetes/dashboard
+### Have prometheus scrape the blackbox exporter endpoint
 
 ### Establish Security
 
