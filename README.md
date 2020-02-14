@@ -188,7 +188,7 @@ Finally, select `Kubeconfig` in the login screen, click `Choose kubeconfig file`
 Once the system is running you can...
 
 * To view Prometheus on http://localhost:9090/ forward its port by `kubectl port-forward -n monitoring  prometheus-prometheus-operator-prometheus-0 9090:9090`
-* To view Grafana on http://localhost:3000/ forward its port by `kubectl port-forward -n monitoring prometheus-operator-grafana-5656685f99-wzrtc 3000:3000`. You can find out the pod name, the user name and the password in the kubernetes dashboard.
+* To view Grafana on http://localhost:3000/ forward its port by `kubectl port-forward -n monitoring svc/prom-operator-grafana 3000:80`
 
 ## Cleanup and Destroy the Infrastructure
 
