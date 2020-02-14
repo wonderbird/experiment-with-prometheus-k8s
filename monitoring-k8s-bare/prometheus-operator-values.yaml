@@ -1,67 +1,21 @@
-additionalScrapeConfigs:
-  ## Monitor internal Kubernetes services
-  # Blackbox-exported should be installed separately via https://github.com/helm/charts/tree/master/stable/prometheus-blackbox-exporter
-  - job_name: 'kubernetes-services'
-     # blackbox-exporter path to scrape
-    metrics_path: /probe
-    params:
-      module: [http_2xx]
-    kubernetes_sd_configs:
-    - role: service
-    relabel_configs:
-
-    # 1. Example relabel to probe only some services that have "example.io/should_be_probed = true" annotation
-    - source_labels: [__meta_kubernetes_service_annotation_example_io_should_be_probed]
-      action: keep
-      regex: true
-
-    # 2. Save address in a separate label
-    - source_labels: [__address__]
-      target_label: __param_target
-
-    # 3. Replace address with an internal blackbox service so scraper is always pointed at blackbox-exporter
-    - target_label: __address__
-      replacement: blackbox-exporter-prometheus-blackbox-exporter-564885c94f-lkmz9:9115
-
-    # 4. Save address in an instance label since __param_target is going to be dropped
-    - source_labels: [__param_target]
-      target_label: instance
-
-    # 5. Save module in an module label since __param_module is going to be dropped
-    - source_labels: [__param_module]
-      target_label: module
-
-    # 6. Add namespace and service name labels
-    - action: labelmap
-      regex: __meta_kubernetes_service_label_(.+)
-    - source_labels: [__meta_kubernetes_namespace]
-      target_label: kubernetes_namespace
-    - source_labels: [__meta_kubernetes_service_name]
-      target_label: kubernetes_name
-
-  ## Monitor external services
-  - job_name: 'external-services'
-    # blackbox-exporter path to scrape
-    metrics_path: /probe
-    static_configs:
-      - labels:
-          module: http_2xx
-        targets:
-          - https://kubernetespodcast.com/about/index.html
-          - https://www.cncf.io
-    relabel_configs:
-      # 1. Save address in a separate label
+prometheus:
+  prometheusSpec:
+    additionalScrapeConfigs:
+    - job_name: 'blackbox-probes'
+      metrics_path: /probe
+      params:
+        module: [http_2xx]
+      static_configs:
+        - targets:
+          - https://www.heise.de
+          - https://www.rtl.de
+          - https://www.prosieben.de
+          - https://www.google.de
+          - https://www.prometheus.io
+      relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
-
-      # 2. Save module in an module label since __param_module is going to be dropped
-      - source_labels: [module]
-        target_label: __param_module
-
-      # 3. Save module in an module label since __param_target is going to be dropped
       - source_labels: [__param_target]
         target_label: instance
-
-      # 4. Replace address with an internal blackbox service so scraper is always pointed at blackbox-exporter
       - target_label: __address__
-        replacement: blackbox-exporter-prometheus-blackbox-exporter-564885c94f-lkmz9:9115
+        replacement: blackbox-exporter-prometheus-blackbox-exporter:9115

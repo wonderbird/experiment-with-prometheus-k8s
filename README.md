@@ -208,6 +208,16 @@ cd /root/work/infrastructure
 terraform destroy -auto-approve
 ```
 
+## Remarks and Tools
+
+### Debug the prometheus.yaml Configuration Used by the Prometheus-Operator
+
+The prometheus pod can be identified in the kubernetes dashboard by its name `prometheus-prom-operator-prometheus-o-prometheus-0`. When it is started, the prometheus configuration taken from the kubernetes secret `prometheus-prom-operator-prometheus-o-prometheus`. The secret contains the final prometheus configuration after `helm` has interpolated all its commandline arguments and parameter files. To inspect this final configuration, get the secret, decode it from base64 and then unzip it:
+
+```sh
+kubectl get secret prometheus-prom-operator-prometheus-o-prometheus -o yaml | grep prometheus.yaml.gz | awk '{print $2}' | base64 --decode | gzip -dc > actual_prometheus.yaml
+```
+
 ## Next Steps
 
 ### Have prometheus scrape the blackbox exporter endpoint
