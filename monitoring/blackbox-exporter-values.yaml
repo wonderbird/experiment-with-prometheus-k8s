@@ -1,14 +1,6 @@
-# This is an adopted default values.yaml for the blackbox-exporter helm chart.
-#
-# The following changes were made:
-# - In "config / modules / http_2xx / http" I have added
-#   ip_protocol_fallback: false
-# - In "serviceMonitor" I have changed the defaults
-# - In "serviceMonitor / targets" I have added some scraping targets
-#
-# Source of the original file:
-# https://github.com/helm/charts/blob/master/stable/prometheus-blackbox-exporter/values.yaml
 restartPolicy: Always
+
+kind: Deployment
 
 podDisruptionBudget: {}
   # maxUnavailable: 0
@@ -69,6 +61,8 @@ extraSecretMounts: []
   #   readOnly: true
   #   defaultMode: 420
 
+allowIcmp: false
+
 resources: {}
   # limits:
   #   memory: 300Mi
@@ -110,25 +104,15 @@ serviceMonitor:
   ## If true, a ServiceMonitor CRD is created for a prometheus operator
   ## https://github.com/coreos/prometheus-operator
   ##
-  enabled: true
+  enabled: false
 
   # Default values that will be used for all ServiceMonitors created by `targets`
   defaults:
     labels: {}
-    interval: 600s
+    interval: 5s
     scrapeTimeout: 5s
     module: http_2xx
 
   targets:
-#    - name: example                    # Human readable URL that will appear in Prometheus / AlertManager
-#      url: http://example.com/healthz  # The URL that blackbox will scrape
-#      labels: {}                       # List of labels for ServiceMonitor. Overrides value set in `defaults`
-#      interval: 60s                    # Scraping interval. Overrides value set in `defaults`
-#      scrapeTimeout: 60s               # Scrape timeout. Overrides value set in `defaults`
-#      module: http_2xx                 # Module used for scraping. Overrides value set in `defaults`
-    - name: heise.de
-      url: http://www.heise.de/
-    - name: google.de
-      url: http://www.google.de/
-    - name: zdf.de
-      url: http://www.zdf.de/
+    - name: example                    # Human readable URL that will appear in Prometheus / AlertManager
+      url: http://www.heise.de/        # The URL that blackbox will scrape
