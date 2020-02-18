@@ -12,6 +12,7 @@
 #
 
 **/*local*
+infrastructure/export-azure-secrets-to-environment-variables.sh
 
 # End of local files
 #####
