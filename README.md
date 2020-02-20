@@ -1,58 +1,44 @@
-# Experiment with Prometheus on Azure Kubernetes Service (AKS)
+# Experiment with Prometheus on Kubernetes
 
-Experimenting with prometheus and its ecosystem hosted on azure kubernetes service (aks).
+Experimenting with prometheus and its ecosystem while exploring different
+hosting services.
 
-This project shows how to run a prometheus server, connect it to grafana and add some services for scraping metrics.
+This project shows how to run a prometheus server, connect it to grafana and
+add blackbox-exporter for scraping metrics.
 
-The software in this project is highly experimental. Its only purpose is for me to learn about
+The software in this project is highly experimental. Its only purpose is for
+me to learn about
 * prometheus and grafana features,
 * integrating them into a kubernetes environment
-* which is hosted on azure
+* which is hosted on azure (for now)
 * and deployed using terraform.
 
 ## Usage
+
+The terraform scripts in this repositories have been tested both with
+kubernetes provided by Docker Desktop running on macOS Catalina and with
+Azure Kubernetes Service (AKS).
+
+The following pages show how to prepare a kubernetes cluster in either
+hosting environment:
+
+* [Prepare a Kubernetes Cluster in Docker Desktop](docs/infrastructure_docker_desktop.md)
+* [Prepare a Kubernetes Cluster in Azure](docs/infrastructure_azure.md) (This file does not exist yet. The documentation is still in this README below.)
+
+After having prepared your kubernetes cluster, proceed to
+
+* [Create Services on any Running Kubernetes Cluster](docs/monitoring.md) (This file does not exist yet. The documentation is still in this README below.)
 
 ### Create a Kubernetes Cluster in Azure
 
 1. Create the base infrastructure as described in section "... With Azure CLI Support" of [boos/terraform](https://hub.docker.com/repository/docker/boos/terraform)
 
 ```sh
-# Pass your Login Credentials to the Azure CLI and to Terraform
-echo -n "Azure client id: " && read -s ARM_CLIENT_ID && echo
-echo -n "Azure client secret: " && read -s ARM_CLIENT_SECRET && echo
-echo -n "Azure subscription id: " && read -s ARM_SUBSCRIPTION_ID && echo
-echo -n "Azure tenant id: " && read -s ARM_TENANT_ID && echo
+# Apply login Credentials for Azure and launch a terraform docker container
+cd infrastructure
+eval "$(gpg --decrypt export-azure-secrets-to-environment-variables.sh.asc)"
 
-export ARM_CLIENT_ID
-export ARM_CLIENT_SECRET
-export ARM_SUBSCRIPTION_ID
-export ARM_TENANT_ID
-export TF_VAR_client_id=$ARM_CLIENT_ID
-export TF_VAR_client_secret=$ARM_CLIENT_SECRET
-
-echo
-echo "      ARM_CLIENT_ID = $ARM_CLIENT_ID"
-if [ -z "$ARM_CLIENT_SECRET" ]; then
-    echo "  ARM_CLIENT_SECRET is empty"
-else
-    echo "  ARM_CLIENT_SECRET = <not printed here>"
-fi
-echo "ARM_SUBSCRIPTION_ID = $ARM_SUBSCRIPTION_ID"
-echo "      ARM_TENANT_ID = $ARM_TENANT_ID"
-
-# Launch the Terraform docker container
-docker run -it --rm --name terra \
-           -e "ARM_CLIENT_ID=$ARM_CLIENT_ID" \
-           -e "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID" \
-           -e "ARM_TENANT_ID=$ARM_TENANT_ID" \
-           -e "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET" \
-           -e "TF_VAR_client_id=$TF_VAR_client_id" \
-           -e "TF_VAR_client_secret=$TF_VAR_client_secret" \
-           -v /Users/stefan/src/experiment-with-prometheus-k8s:/root/work \
-           boos/terraform
-
-# To apply a modified configuration of the infrastructure quickly, execute
-# the following commands in the boos/terraform docker container
+# Apply the configuration of the infrastructure
 cd /root/work/infrastructure
 
 # If this is the first time you run terraform in this directory
@@ -66,44 +52,7 @@ terraform apply -auto-approve
 2. Export the infrastructure configuration from the terraform state into environment variables of the docker container
 
 ```sh
-export TF_VAR_k8s_host=$(terraform output host) \
-  && export TF_VAR_k8s_username=$(terraform output username) \
-  && export TF_VAR_k8s_password=$(terraform output password) \
-  && export TF_VAR_k8s_client_certificate=$(terraform output client_certificate) \
-  && export TF_VAR_k8s_client_key=$(terraform output client_key) \
-  && export TF_VAR_k8s_cluster_ca_certificate=$(terraform output cluster_ca_certificate); \
-  echo; \
-  echo "                  Host = ${TF_VAR_k8s_host}"; \
-  echo "              Username = ${TF_VAR_k8s_username}" ; \
-  if [ -z "$TF_VAR_k8s_password" ]; then \
-    echo "              Password is empty"; \
-  else \
-    echo "              Password won't be printed here"; \
-  fi; \
-  if [ -z "$TF_VAR_k8s_client_certificate" ]; then \
-    echo "    Client certificate is empty"; \
-  else \
-    echo "    Client certificate won't be printed here"; \
-  fi; \
-  if [ -z "$TF_VAR_k8s_client_key" ]; then \
-    echo "            Client key is empty"; \
-  else \
-    echo "            Client key won't be printed here"; \
-  fi; \
-  if [ -z "$TF_VAR_k8s_cluster_ca_certificate" ]; then \
-    echo "Cluster CA certificate is empty"; \
-  else \
-    echo "Cluster CA certificate won't be printed here"; \
-  fi
-```
-
-### Alternative to Azure: Use Docker Desktop Kubernetes
-
-```sh
-docker run -it --rm --name terra \
-           -v /Users/stefan/.kube:/root/.kube \
-           -v /Users/stefan/src/experiment-with-prometheus-k8s:/root/work \
-           boos/terraform
+source export-k8s-secrets-to-environment-variables.sh
 ```
 
 ### Create Services on Kubernetes
@@ -144,51 +93,12 @@ az aks get-credentials --resource-group k8srg --name k8s_prod
 az aks browse --resource-group k8srg --name k8s_prod
 ```
 
-### Docker Desktop Kubernetes: Install Kubernetes Dashboard
-
-Setting up the Kubernetes Dashboard is described in [5 Minutes to Kubernetes Dashboard running on Docker Desktop for Windows 2.0.0.3](http://collabnix.com/kubernetes-dashboard-on-docker-desktop-for-windows-2-0-0-3-in-2-minutes/). The procedure also works on macOS Catalina.
-
-In short:
-
-```sh
-# Install the dashboard according to https://github.com/kubernetes/dashboard
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc2/aio/deploy/recommended.yaml
-
-# Forward the dashboard to localhost
-kubectl proxy
-```
-
-&rarr; Open the dashboard: http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
-
-![Kubernetes Dashboard Login](docs/k8s-dashboard-login.png)
-
-Next, set the credentials for the docker-[for-]desktop user
-
-**On Windows**
-
-```powershell
-# Execute the following steps in PowerShell
-$TOKEN=((kubectl -n kube-system describe secret default | Select-String "token:") -split " +")[1]
-kubectl config set-credentials docker-for-desktop --token="${TOKEN}"
-```
-
-**On macOS / Linux**
-
-```sh
-TOKEN=$(kubectl -n kube-system describe secret default | grep '^token' | sed 's/token\:\ *//')
-kubectl config set-credentials docker-desktop --token="$TOKEN"
-```
-
-Finally, select `Kubeconfig` in the login screen, click `Choose kubeconfig file` and select the file `.kube/config` in your home directory. On macOS you may need to press `Cmd+Shift+.` in order to show hidden directories in the open file dialog.
-
-![Kubernetes Dashboard](docs/k8s-dashboard.png)
-
 ## Access Prometheus and Grafana
 
 Once the system is running you can...
 
 * To view Prometheus on http://localhost:9090/ forward its port by `kubectl port-forward -n monitoring  prometheus-prometheus-operator-prometheus-0 9090:9090`
-* To view Grafana on http://localhost:3000/ forward its port by `kubectl port-forward -n monitoring svc/prom-operator-grafana 3000:80`
+* To view Grafana on http://localhost:3000/ forward its port by `kubectl port-forward -n monitoring svc/prometheus-operator-grafana 3000:80`
 
 ## Cleanup and Destroy the Infrastructure
 
@@ -224,6 +134,7 @@ kubectl get secret prometheus-prom-operator-prometheus-o-prometheus -o yaml | gr
 
 ### Establish Security
 
+* Remove redundant values from the *-values.yaml files. "redundant" means: values which have just been copy-pasted from the values.yaml file of the original helm chart.
 * [Securing your Helm Installation](https://v2.helm.sh/docs/using_helm/#securing-your-helm-installation)
 
 ### Resolve Code Smells
