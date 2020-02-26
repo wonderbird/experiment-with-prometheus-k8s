@@ -43,6 +43,8 @@ kubectl get secret prometheus-prom-operator-prometheus-o-prometheus -o yaml | gr
 
 ### Have prometheus scrape the blackbox exporter endpoint using a ServiceMonitor
 
+Double check whether blackbox probing has made it into Prometheus in the mean time: [Github: **WIP** BlackboxMonitor #2832](https://github.com/coreos/prometheus-operator/pull/2832).
+
 ### Establish Security
 
 * Remove redundant values from the *-values.yaml files. "redundant" means: values which have just been copy-pasted from the values.yaml file of the original helm chart.
