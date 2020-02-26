@@ -15,14 +15,7 @@ In short:
 ```sh
 # Install the dashboard according to https://github.com/kubernetes/dashboard
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc2/aio/deploy/recommended.yaml
-
-# Forward the dashboard to localhost
-kubectl proxy
 ```
-
-&rarr; Open the dashboard: http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
-
-![Kubernetes Dashboard Login](k8s-dashboard-login.png)
 
 Next, set the credentials for the docker-for-desktop user
 
@@ -41,7 +34,16 @@ TOKEN=$(kubectl -n kube-system describe secret default | grep '^token' | sed 's/
 kubectl config set-credentials docker-desktop --token="$TOKEN"
 ```
 
-Finally, select `Kubeconfig` in the login screen, click `Choose kubeconfig file` and select the file `.kube/config` in your home directory. On macOS you may need to press `Cmd+Shift+.` in order to show hidden directories in the open file dialog.
+```
+# Forward the dashboard to localhost
+kubectl proxy
+```
+
+&rarr; Open the dashboard: http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+
+![Kubernetes Dashboard Login](k8s-dashboard-login.png)
+
+Select `Kubeconfig` in the login screen, click `Choose kubeconfig file` and select the file `.kube/config` in your home directory. On macOS you may need to press `Cmd+Shift+.` in order to show hidden directories in the open file dialog.
 
 ![Kubernetes Dashboard](k8s-dashboard.png)
 
